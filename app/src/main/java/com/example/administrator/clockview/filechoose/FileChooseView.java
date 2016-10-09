@@ -1,10 +1,13 @@
 package com.example.administrator.clockview.filechoose;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.v4.content.res.ConfigurationHelper;
@@ -13,7 +16,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
+import com.example.administrator.clockview.R;
 import com.example.administrator.clockview.Utils;
 
 import java.io.File;
@@ -36,6 +41,7 @@ public class FileChooseView extends View {
     private float lineWidth = 30F;
     private float screenWidth = 0F;
     private float screenHeigh = 1800F;
+    private float picHeigh = 40F;
     private LinkedList<FileModule> fileList = new LinkedList<>();
     private int widthMeasureSpec, heightMeasureSpec;
 
@@ -94,7 +100,7 @@ public class FileChooseView extends View {
         FileModule module = null;
         if (fileList.isEmpty()) {
             for (String name : list) {
-                module = new FileModule(floor, name, rootFilePath);
+                module = new FileModule(floor, name, rootFilePath, getFileType(rootFilePath + "/" + name));
                 fileList.add(module);
             }
         } else {
@@ -123,7 +129,7 @@ public class FileChooseView extends View {
 //            }
             fileList.get(lineNumber).setOpen(true);
             for (int i = 0; i < list.length; i++) {
-                module = new FileModule(floor, list[i], rootFilePath);
+                module = new FileModule(floor, list[i], rootFilePath, getFileType(rootFilePath + "/" + list[i]));
                 fileList.add(lineNumber + 1 + i, module);
             }
         }
@@ -140,6 +146,23 @@ public class FileChooseView extends View {
         invalidate();
     }
 
+    private int getFileType(String absolutePath) {
+        if (Utils.isFileFormate(absolutePath, "txt") || Utils.isFileFormate(absolutePath, "TXT")) {
+            return FileModule.FILE_TYPE_TXT;
+        } else if (Utils.isFileFormate(absolutePath, "mp3")) {
+            return FileModule.FILE_TYPE_MP3;
+        } else if (Utils.isFileFormate(absolutePath, "doc")) {
+            return FileModule.FILE_TYPE_DOC;
+        } else if (Utils.isFileFormate(absolutePath, "jpg") || Utils.isFileFormate(absolutePath, "jpeg") || Utils.isFileFormate(absolutePath, "png")) {
+            return FileModule.FILE_TYPE_PIC;
+        } else if (Utils.isFileFormate(absolutePath, "MP4") || Utils.isFileFormate(absolutePath, "mp4") || Utils.isFileFormate(absolutePath, "avi")) {
+            return FileModule.FILE_TYPE_PIC;
+        } else if (-1 == absolutePath.lastIndexOf(".")) {
+            return FileModule.FILE_TYPE_FOLDER;
+        } else {
+            return FileModule.FILE_TYPE_FILE;
+        }
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -165,12 +188,47 @@ public class FileChooseView extends View {
         }
 
         Paint paint = new Paint();
-        paint.setTextSize(45);
+        paint.setTextSize(30);
         paint.setColor(Color.BLACK);
         paint.setStrokeWidth(5);
 
+        Matrix matrix = new Matrix();
+        matrix.setScale(0.125f, 0.125f);
+
+        Bitmap pic = null;
+        Bitmap bm = null;
+
         for (int i = 0; i < fileList.size(); i++) {
-            canvas.drawText(fileList.get(i).getName(), fileList.get(i).getFloor() * lineWidth, i * lineHeigh + Utils.dip2px(context, 50), paint);
+            int picId = 0;
+            switch (fileList.get(i).getFileType()) {
+                case FileModule.FILE_TYPE_DOC:
+                    picId = R.drawable.icon_doc;
+                    break;
+                case FileModule.FILE_TYPE_FILE:
+                    picId = R.drawable.icon_file;
+                    break;
+                case FileModule.FILE_TYPE_FOLDER:
+                    picId = R.drawable.icon_folder;
+                    break;
+                case FileModule.FILE_TYPE_MP3:
+                    picId = R.drawable.icon_mp3;
+                    break;
+                case FileModule.FILE_TYPE_PIC:
+                    picId = R.drawable.icon_picture;
+                    break;
+                case FileModule.FILE_TYPE_VIDEO:
+                    picId = R.drawable.icon_video;
+                    break;
+                case FileModule.FILE_TYPE_TXT:
+                    picId = R.drawable.icon_txt;
+                    break;
+
+            }
+            pic = BitmapFactory.decodeResource(context.getResources(), picId);
+            bm = Bitmap.createBitmap(pic, 0, 0, pic.getWidth(),
+                    pic.getHeight(), matrix, true);
+            canvas.drawBitmap(bm,fileList.get(i).getFloor() * lineWidth,i * lineHeigh + Utils.dip2px(context, 20) , paint);
+            canvas.drawText(fileList.get(i).getName(), fileList.get(i).getFloor() * lineWidth + bm.getWidth(), i * lineHeigh + Utils.dip2px(context, 50), paint);
             canvas.drawRect(fileList.get(i).getFloor() * lineWidth, i * lineHeigh + Utils.dip2px(context, 60), screenWidth, i * lineHeigh + Utils.dip2px(context, 62), paint);
 
         }

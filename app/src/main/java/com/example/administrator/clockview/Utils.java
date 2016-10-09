@@ -17,4 +17,23 @@ public class Utils {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
     }
+
+    /**
+     * 判断文件是否是相应格式
+     *
+     * @param path
+     * @param formate
+     * @return
+     */
+    public static boolean isFileFormate(String path, String formate) {
+        if (null == path || -1 == path.lastIndexOf("/") || -1 == path.lastIndexOf("."))
+            return false;
+        if (path.substring(path.lastIndexOf(".") + 1) == null) {
+            return false;
+        }
+        if (path.substring(path.lastIndexOf(".") + 1).equals(formate)) {
+            return true;
+        }
+        return false;
+    }
 }
