@@ -6,6 +6,9 @@ import android.os.Bundle;
 
 import com.example.administrator.clockview.R;
 
+/**
+ * 文件选择视图
+ */
 public class FileChooseActivity extends AppCompatActivity {
 
     @Override

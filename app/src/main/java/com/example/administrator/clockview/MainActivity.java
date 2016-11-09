@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
+/**
+ * 自定义view
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Override
